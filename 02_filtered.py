@@ -8,8 +8,8 @@ def StatisticalOutlierRemoval(filtered_pcd):
     - nb_neighbors: 每个点用于计算距离的邻域点数
     - std_ratio: 标准差倍数，决定离群值的阈值
     """
-    cl, ind = filtered_pcd.remove_statistical_outlier(nb_neighbors=10,
-                                                      std_ratio=1)
+    cl, ind = filtered_pcd.remove_statistical_outlier(nb_neighbors=100,
+                                                      std_ratio=0.8)
     # 只保留内点（inliers）
     filtered_pcd_clean = filtered_pcd.select_by_index(ind)
     return filtered_pcd_clean
@@ -20,7 +20,7 @@ def RadiusOutlierRemoval(filtered_pcd):
     - nb_points: 在给定半径内必须存在的最小点数
     - radius: 邻域搜索半径
     """
-    cl, ind = filtered_pcd.remove_radius_outlier(nb_points=10, radius=10)
+    cl, ind = filtered_pcd.remove_radius_outlier(nb_points=50, radius=50)
     # 只保留满足条件的点
     filtered_pcd_clean = filtered_pcd.select_by_index(ind)
     return filtered_pcd_clean

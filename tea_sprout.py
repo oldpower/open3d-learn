@@ -93,6 +93,7 @@ def analyze_tea_sprout(pcd_path):
     """茶芽点云分析主流程"""
     # 读取点云
     pcd = o3d.io.read_point_cloud(pcd_path)
+    pcd = swapxy(pcd)
     print(f"原始点云点数: {len(pcd.points)}")
     
     # 预处理
@@ -177,6 +178,25 @@ def validate_shape(pcd):
         'valid': True
     }
 
+def swapxy(pcd):
+    """
+    交换点云xy轴，避免镜像数据。
+    """
+    # 将点云数据转化为numpy数组
+    points = np.asarray(pcd.points)
+    colors = np.asarray(pcd.colors)  # 获取颜色数据
+    # 筛选Z轴小于设定阈值的点及其对应的颜色
+    mask = (points[:, 2] > 500) & (points[:, 2] < 3000)
+    filtered_points = points[mask]
+    filtered_colors = colors[mask]
+    # 交换X轴和Y轴的数据
+    filtered_points[:, [0, 1]] = filtered_points[:, [1, 0]]
+    # 创建新的点云对象并赋值筛选后的点和颜色
+    filtered_pcd = o3d.geometry.PointCloud()
+    filtered_pcd.points = o3d.utility.Vector3dVector(filtered_points)
+    filtered_pcd.colors = o3d.utility.Vector3dVector(filtered_colors)
+    return filtered_pcd
+
 if __name__ == "__main__":
     # 使用示例
     pcd_path = "demo_part.pcd"  # 替换为实际点云文件路径
@@ -185,10 +205,10 @@ if __name__ == "__main__":
     # 提取根茎底部点作为采摘点
     if stem is not None:
         stem_points = np.asarray(stem.points)
+        
         # 假设Z轴向下，取Z值最大的点作为根茎底部
         bottom_point_idx = np.argmax(stem_points[:, 2])
         picking_point = stem_points[bottom_point_idx]
         print(f"根茎底部采摘点坐标(mm): {picking_point}")
-
         stem_features = validate_shape(stem)
         print(f"根茎形态特征: {stem_features}")
